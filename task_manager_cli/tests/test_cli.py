@@ -1,3 +1,5 @@
-def test_cli_import():
-    from task_manager_cli.cli import commands
-    assert hasattr(commands, "main")
+def test_cli_smoke():
+    from task_manager_cli.cli import main
+
+    # main should be callable
+    assert callable(main)

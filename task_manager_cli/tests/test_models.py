@@ -1,3 +1,4 @@
-def test_models_import():
-    from task_manager_cli.models import base
-    assert hasattr(base, "Base")
+def test_models_importable():
+    import task_manager_cli.models as models
+
+    assert hasattr(models, "Base")

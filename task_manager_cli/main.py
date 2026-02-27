@@ -2,8 +2,8 @@
 from task_manager_cli.cli.commands import main
 
 
-def run(argv=None):
-    return main(argv=argv)
+def run():
+    return main()
 
 
 if __name__ == "__main__":

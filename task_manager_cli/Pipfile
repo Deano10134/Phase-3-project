@@ -4,13 +4,12 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-sqlalchemy = "*"
 click = "*"
+sqlalchemy = "*"
 tomli = "*"
 
 [dev-packages]
 pytest = "*"
-alembic = "*"
 
 [requires]
-python_version = "3.10"
+python_version = "3.11"

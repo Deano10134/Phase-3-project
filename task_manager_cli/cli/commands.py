@@ -84,6 +84,4 @@ def export_tasks():
 
 
 def main(argv=None):
-    # Use Click's programmatic API to invoke the CLI with provided args
-    # `Group.main` accepts an `args` parameter for programmatic calls.
-    return cli.main(args=argv)
+    return cli(argv=argv)

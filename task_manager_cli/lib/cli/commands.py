@@ -84,4 +84,5 @@ def export_tasks():
 
 
 def main(argv=None):
-    return cli(argv=argv)
+    # Use click's programmatic invocation entry so different click versions work
+    return cli.main(args=argv)

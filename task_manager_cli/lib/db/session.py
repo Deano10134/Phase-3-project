@@ -4,11 +4,13 @@ This reads `config/settings.toml` if present (using `tomli`) to obtain
 `database.url`. `tomli` is imported only when needed.
 """
 import os
+from typing import Optional
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-def get_engine(url: str | None = None):
+def get_engine(url: Optional[str] = None):
     if url is None:
         # prefer explicit environment variable when present (useful for tests)
         url = os.environ.get("DATABASE_URL")

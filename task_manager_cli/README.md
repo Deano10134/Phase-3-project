@@ -47,3 +47,32 @@ Notes
 
 - The canonical code lives under `lib/` per the layout above. Old, scattered modules were consolidated into `lib/` to make the package structure simpler.
 - If you need Alembic migrations, I can add a basic `alembic` setup next.
+
+Alembic
+
+If you want to manage schema migrations with Alembic, run the following
+from the repository root (where `alembic.ini` lives).
+
+Using the project's virtualenv (recommended):
+
+```bash
+# activate your virtualenv, then:
+alembic upgrade head
+```
+
+If you prefer the explicit config path or are running outside the repo
+root:
+
+```bash
+python -m alembic -c /full/path/to/alembic.ini upgrade head
+```
+
+To create a new migration after model changes:
+
+```bash
+alembic revision --autogenerate -m "describe changes"
+```
+
+Note: The project includes a simple initial migration that creates all
+tables from `lib/db/models.py`'s `Base.metadata`. For incremental
+changes prefer `--autogenerate` so Alembic can produce diffs.

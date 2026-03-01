@@ -1,158 +1,81 @@
-"""Consolidated CLI implementation.
+"""Main CLI entry point.
 
-This file merges the previous `commands.py` and `services.py` logic
-into a single module for the `lib` layout.
+Separates scripted CLI elements from the business logic encapsulated in TaskService.
 """
 import click
 from typing import List, Dict, Optional
 
-from task_manager_cli.lib.db.session import get_engine, get_session
-from task_manager_cli.lib.db.models import Task
+from task_manager_cli.lib.services import TaskService
 
+# Initialize the service globally
+service = TaskService()
 
 @click.group()
 def cli():
-    """Task Manager CLI"""
-
-
-@cli.command()
-@click.argument("name", required=False)
-def noop(name):
-    """A no-op command for smoke testing."""
-    click.echo(f"noop {name or ''}")
-
+    """Welcome to the Task Manager CLI!
+    Use the commands below to manage your tasks efficiently.
+    """
 
 @cli.command("list-tasks")
-def list_tasks_cmd():
-    """Query tasks from the database and print CLI-friendly output."""
-    engine = get_engine()
-    session = get_session(engine)
-
-    tasks = session.query(Task).order_by(Task.created_at).all()
+@click.option("--user", help="Filter tasks by user username.")
+@click.option("--category", help="Filter tasks by category name.")
+def list_tasks_cmd(user, category):
+    """List tasks with detailed info and optional filtering."""
+    click.echo(f"[*] Querying database... {f'filtering by user:{user}' if user else ''} {f'filtering by category:{category}' if category else ''}")
+    
+    tasks = service.list_tasks(user_name=user, category_name=category)
     if not tasks:
-        click.echo("No tasks found.")
+        click.secho("[-] No tasks found matching your criteria.", fg="yellow")
         return
 
-    task_dicts = []
-    for t in tasks:
-        age = getattr(t, "age_days", None)
-        created = t.created_at.isoformat() if t.created_at else "-"
-        task_dict = {
-            "id": t.id,
-            "title": t.title,
-            "created": created,
-            "age_days": int(age) if age is not None else None,
-            "completed": bool(getattr(t, "completed", False)),
-        }
-        task_dicts.append(task_dict)
-
-    for d in task_dicts:
-        click.echo(f"[{d['id']}] {d['title']} - created: {d['created']} - age_days: {d['age_days']}")
-
+    click.echo("\n[+] Found the following tasks:")
+    for d in tasks:
+        details = f"user: {d['user']}, category: {d['category']}"
+        status = click.style("DONE", fg="green") if d["completed"] else click.style("PENDING", fg="red")
+        click.echo(
+            f"  [{d['id']}] {d['title']} ({details}) - status: {status} - created: {d['created']} - age_days: {d['age_days']}"
+        )
 
 @cli.command("show-summary")
 def show_summary_cmd():
-    """Show a tuple summary of tasks: (total, completed)."""
-    engine = get_engine()
-    session = get_session(engine)
-    total = session.query(Task).count()
-    completed = session.query(Task).filter(Task.completed.is_(True)).count()
-    summary = (total, completed)
-    click.echo(f"Task summary: {summary}")
+    """Show a high-level summary of your productivity."""
+    click.echo("[*] Calculating task summary...")
+    total, completed = service.get_summary()
+    
+    click.echo("-" * 30)
+    click.secho(f"Total Tasks:     {total}", bold=True)
+    click.secho(f"Completed Tasks: {completed}", fg="green")
+    click.secho(f"Pending Tasks:   {total - completed}", fg="yellow")
+    click.echo("-" * 30)
 
+@cli.command("add-task")
+@click.argument("title")
+@click.option("--desc", help="Optional task description.")
+def add_task_cmd(title, desc):
+    """Add a new task with validation."""
+    try:
+        click.echo(f"[*] Attempting to add task: '{title}'...")
+        # Simple validation before calling service
+        if len(title.strip()) < 3:
+            raise click.BadParameter("Title is too short.")
+            
+        new_task = service.create_task(title=title, description=desc)
+        click.secho(f"[✓] Success! Task '{new_task['title']}' created with ID: {new_task['id']}", fg="green")
+    except ValueError as e:
+        click.secho(f"[!] Validation Error: {e}", fg="bright_red")
+    except Exception as e:
+        click.secho(f"[!] An error occurred: {e}", fg="red")
 
-@cli.command("export-tasks")
-def export_tasks_cmd():
-    """Export tasks as a list of tuples (id, title, completed)."""
-    engine = get_engine()
-    session = get_session(engine)
-    tasks = session.query(Task).order_by(Task.id).all()
-    tuples = [(t.id, t.title, bool(t.completed)) for t in tasks]
-    for tup in tuples:
-        click.echo(str(tup))
-
+@cli.command("remove-task")
+@click.argument("task_id", type=int)
+def remove_task_cmd(task_id):
+    """Delete a task by its ID."""
+    if click.confirm(f"Are you sure you want to delete task #{task_id}?"):
+        success = service.delete_task(task_id)
+        if success:
+            click.secho(f"[✓] Task #{task_id} has been removed.", fg="green")
+        else:
+            click.secho(f"[-] Task #{task_id} not found.", fg="yellow")
 
 def main(argv=None):
     return cli.main(args=argv)
-
-
-# --- Service helpers (previously in services.py) ---
-
-
-def list_tasks(engine=None) -> List[Dict]:
-    engine = engine or get_engine()
-    session = get_session(engine)
-    try:
-        tasks = session.query(Task).order_by(Task.created_at).all()
-        result = []
-        for t in tasks:
-            result.append(
-                {
-                    "id": t.id,
-                    "title": t.title,
-                    "description": t.description,
-                    "completed": bool(t.completed),
-                    "created": t.created_at.isoformat() if t.created_at else None,
-                    "age_days": int(t.age_days) if t.age_days is not None else None,
-                }
-            )
-        return result
-    finally:
-        session.close()
-
-
-def get_task(task_id: int, engine=None) -> Optional[Task]:
-    engine = engine or get_engine()
-    session = get_session(engine)
-    try:
-        return session.query(Task).filter(Task.id == task_id).one_or_none()
-    finally:
-        session.close()
-
-
-def create_task(title: str, description: Optional[str] = None, engine=None) -> Dict:
-    engine = engine or get_engine()
-    session = get_session(engine)
-    try:
-        task = Task(title=title.strip(), description=(description or None))
-        session.add(task)
-        session.commit()
-        session.refresh(task)
-        return {
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "completed": bool(task.completed),
-            "created": task.created_at.isoformat() if task.created_at else None,
-        }
-    finally:
-        session.close()
-
-
-def complete_task(task_id: int, engine=None) -> bool:
-    engine = engine or get_engine()
-    session = get_session(engine)
-    try:
-        task = session.query(Task).filter(Task.id == task_id).one_or_none()
-        if task is None:
-            return False
-        task.completed = True
-        session.add(task)
-        session.commit()
-        return True
-    finally:
-        session.close()
-
-
-def delete_task(task_id: int, engine=None) -> bool:
-    engine = engine or get_engine()
-    session = get_session(engine)
-    try:
-        task = session.query(Task).filter(Task.id == task_id).one_or_none()
-        if task is None:
-            return False
-        session.delete(task)
-        session.commit()
-        return True
-    finally:
-        session.close()

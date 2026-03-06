@@ -1,9 +1,8 @@
-# task_manager_cli
+# Phase 3 Project - task_manager_cli
 
 Project layout
 
 ```
-.
 ├── Pipfile
 ├── Pipfile.lock
 ├── README.md
@@ -20,21 +19,22 @@ Project layout
 ```
 
 Quickstart
+ 1. In the repo, go to the `task_manager_cli` directory:
 
-1. Install dependencies (using Pipenv):
+2. Install dependencies (using Pipenv):
 
 ```bash
 pipenv install --dev
 pipenv shell
 ```
 
-2. Initialize the database and seed demo data:
+3. Initialize the database and seed demo data:
 
 ```bash
 python -m task_manager_cli.lib.db.seed
 ```
 
-3. Run the CLI:
+4. Run the CLI:
 
 ```bash
 python -m task_manager_cli.lib.cli.main
@@ -48,7 +48,7 @@ pytest task_manager_cli/tests
 
 Notes
 
-- **Separation of Concerns**: The project follows a modular architecture:
+- **Separation of files**: The project follows a modular architecture:
     - [lib/domain.py](lib/domain.py): Domain entities for the application logic.
     - [lib/db/models.py](lib/db/models.py): Database schema and SQLAlchemy ORM models.
     - [lib/cli/main.py](lib/cli/main.py): CLI commands and user interaction scripts.

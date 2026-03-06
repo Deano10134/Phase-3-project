@@ -1,6 +1,9 @@
 # Phase 3 Project - task_manager_cli
 
-Project layout
+Note: This project is a CLI-based task manager application built with Python. It uses SQLAlchemy for database interactions and follows a modular architecture to separate concerns between domain logic, database models, and CLI commands. It also includes Alembic for database migrations, allowing for easy schema evolution as the project grows.
+It was built as part of a Project that I have done as part of Phase 3 of my Software Engineering Transform course at Academy Xi to demonstrate best practices in Python project structure, dependency management with Pipenv, and database handling with SQLAlchemy and Alembic.
+
+# Project layout
 
 ```
 ├── Pipfile

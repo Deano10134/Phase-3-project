@@ -53,8 +53,8 @@ Notes
     - **Domain**: [lib/domain.py](lib/domain.py) contains plain Python objects used across the application.
     - **Services**: [lib/services.py](lib/services.py) handles the interaction between domain objects and the database.
     - **CLI**: [lib/cli/main.py](lib/cli/main.py) provides the command-line interface using Click.
+	
 - The canonical code lives under `lib/` per the layout above. Old, scattered modules were consolidated into `lib/` to make the package structure simpler.
-- If you need Alembic migrations, I can add a basic `alembic` setup next.
 
 Alembic
 

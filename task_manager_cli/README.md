@@ -8,12 +8,15 @@ Project layout
 ├── Pipfile.lock
 ├── README.md
 └── lib
-	├── cli.py
-	├── db
-	│   ├── models.py
-	│   └── seed.py
-	├── debug.py
-	└── helpers.py
+    ├── cli/
+    │   └── main.py       <-- CLI entry point
+    ├── db/
+    │   ├── models.py     <-- SQLAlchemy ORM models
+    │   └── seed.py       <-- Database seeding logic
+    ├── domain.py         <-- Pure Python domain objects
+    ├── services.py       <-- Business logic / Service layer
+    ├── debug.py
+    └── helpers.py
 ```
 
 Quickstart
@@ -34,7 +37,7 @@ python -m task_manager_cli.lib.db.seed
 3. Run the CLI:
 
 ```bash
-python -m task_manager_cli.lib.cli
+python -m task_manager_cli.lib.cli.main
 ```
 
 Run tests:
@@ -45,6 +48,11 @@ pytest task_manager_cli/tests
 
 Notes
 
+- **Separation of Concerns**: The project follows a modular architecture:
+    - **Models**: [lib/db/models.py](lib/db/models.py) contains pure SQLAlchemy ORM definitions.
+    - **Domain**: [lib/domain.py](lib/domain.py) contains plain Python objects used across the application.
+    - **Services**: [lib/services.py](lib/services.py) handles the interaction between domain objects and the database.
+    - **CLI**: [lib/cli/main.py](lib/cli/main.py) provides the command-line interface using Click.
 - The canonical code lives under `lib/` per the layout above. Old, scattered modules were consolidated into `lib/` to make the package structure simpler.
 - If you need Alembic migrations, I can add a basic `alembic` setup next.
 

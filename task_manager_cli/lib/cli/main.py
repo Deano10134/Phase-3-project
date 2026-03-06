@@ -80,6 +80,39 @@ def remove_task_cmd(task_id):
         else:
             click.secho(f"[-] Task #{task_id} not found.", fg="yellow")
 
+@cli.command("complete-task")
+@click.argument("task_id", type=int)
+def complete_task_cmd(task_id):
+    """Mark a task as completed."""
+    success = service.mark_complete(task_id)
+    if success:
+        click.secho(f"[✓] Task #{task_id} marked as completed.", fg="green")
+    else:
+        click.secho(f"[-] Task #{task_id} not found.", fg="yellow")
+
+@cli.command("list-users")
+def list_users_cmd():
+    """List all registered users."""
+    users = service.get_users()
+    if not users:
+        click.echo("No users found.")
+        return
+    click.echo("\n[+] Registered Users:")
+    for u in users:
+        click.echo(f"  - {u['username']} ({u['email']})")
+
+@cli.command("list-categories")
+@click.option("--user", help="Filter categories by user username.")
+def list_categories_cmd(user):
+    """List task categories."""
+    categories = service.get_categories(user_name=user)
+    if not categories:
+        click.echo("No categories found.")
+        return
+    click.echo("\n[+] Categories:")
+    for c in categories:
+        click.echo(f"  - {c['name']} (Owner: {c['user']})")
+
 def main(argv=None):
     return cli.main(args=argv)
 

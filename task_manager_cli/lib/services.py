@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Dict, Optional
 from task_manager_cli.lib.db.models import Task, User, Category, Tag
 from task_manager_cli.lib.db.session import get_engine, get_session
@@ -73,5 +74,37 @@ class TaskService:
             session.delete(task)
             session.commit()
             return True
+        finally:
+            session.close()
+
+    def mark_complete(self, task_id: int) -> bool:
+        session = get_session(self.engine)
+        try:
+            task = session.query(Task).filter(Task.id == task_id).one_or_none()
+            if not task:
+                return False
+            task.completed = True
+            task.completed_at = datetime.utcnow()
+            session.commit()
+            return True
+        finally:
+            session.close()
+
+    def get_users(self) -> List[Dict]:
+        session = get_session(self.engine)
+        try:
+            users = session.query(User).all()
+            return [{"username": u.username, "email": u.email} for u in users]
+        finally:
+            session.close()
+
+    def get_categories(self, user_name: str = None) -> List[Dict]:
+        session = get_session(self.engine)
+        try:
+            query = session.query(Category)
+            if user_name:
+                query = query.join(User).filter(User.username == user_name)
+            categories = query.all()
+            return [{"name": c.name, "user": c.user.username if c.user else "System"} for c in categories]
         finally:
             session.close()

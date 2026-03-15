@@ -1,9 +1,9 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta
 
 from .models import Base, User, Category, Task, Tag
 from .session import get_engine, get_session
+
+
 def seed_database(engine=None, num_users=2, num_tasks=5):
     """Seed the database with sample data"""
     engine = engine or get_engine()

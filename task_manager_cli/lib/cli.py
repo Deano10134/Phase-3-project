@@ -3,7 +3,6 @@
 Separates scripted CLI elements from the business logic encapsulated in TaskService.
 """
 import click
-from typing import List, Dict, Optional
 
 from task_manager_cli.lib.services import TaskService
 

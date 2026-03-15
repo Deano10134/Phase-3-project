@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict
 from task_manager_cli.lib.db.models import Task, User, Category, Tag
 from task_manager_cli.lib.db.session import get_engine, get_session
 

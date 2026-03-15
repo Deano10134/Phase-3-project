@@ -4,7 +4,6 @@ This uses the project's `get_engine()` when running migrations online so
 the same database URL selection logic is respected.
 """
 from logging.config import fileConfig
-import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool

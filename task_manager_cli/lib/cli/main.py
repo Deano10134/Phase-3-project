@@ -8,6 +8,25 @@ from task_manager_cli.lib.services import TaskService
 # Initialize the service globally
 service = TaskService()
 
+
+def build_summary_rows(total, completed):
+    """Return CLI-friendly summary rows using dicts, tuples, and a list.
+
+    The returned list contains tuples of `(label, value, color)` so the CLI can
+    render summary data in a simple, structured way.
+    """
+    metrics = {
+        "Total Tasks": total,
+        "Completed Tasks": completed,
+        "Pending Tasks": total - completed,
+    }
+    row_config = [
+        ("Total Tasks", None),
+        ("Completed Tasks", "green"),
+        ("Pending Tasks", "yellow"),
+    ]
+    return [(label, metrics[label], color) for label, color in row_config]
+
 @click.group()
 def cli():
     """Welcome to the Task Manager CLI!
@@ -44,11 +63,11 @@ def show_summary_cmd():
     """Show a high-level summary of your productivity."""
     click.echo("[*] Calculating task summary...")
     total, completed = service.get_summary()
+    summary_rows = build_summary_rows(total, completed)
     
     click.echo("-" * 30)
-    click.secho(f"Total Tasks:     {total}", bold=True)
-    click.secho(f"Completed Tasks: {completed}", fg="green")
-    click.secho(f"Pending Tasks:   {total - completed}", fg="yellow")
+    for label, value, color in summary_rows:
+        click.secho(f"{label:<16} {value}", fg=color, bold=(label == "Total Tasks"))
     click.echo("-" * 30)
 
 @cli.command("add-task")

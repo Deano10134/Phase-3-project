@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from .models import Base, User, Category, Task, Tag
+from .models import Base, User, Category, Task, Tag, task_tag
 from .session import get_engine, get_session
 
 
@@ -19,6 +19,7 @@ def seed_database(engine=None, num_users=2, num_tasks=5):
 
 def clear_data(session):
     """Clear all data from tables"""
+    session.execute(task_tag.delete())
     session.query(Task).delete()
     session.query(Category).delete()
     session.query(Tag).delete()

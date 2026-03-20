@@ -132,6 +132,63 @@ def list_categories_cmd(user):
     for c in categories:
         click.echo(f"  - {c['name']} (Owner: {c['user']})")
 
+
+@cli.command("interactive")
+def interactive_cmd():
+    """Run an interactive menu so users can choose different CLI options."""
+    menu = {
+        "1": "List tasks",
+        "2": "Add task",
+        "3": "Complete task",
+        "4": "Remove task",
+        "5": "Show summary",
+        "6": "List users",
+        "7": "List categories",
+        "0": "Exit",
+    }
+
+    click.secho("\nTask Manager Interactive Mode", fg="cyan", bold=True)
+    while True:
+        click.echo("\nChoose an option:")
+        for key, label in menu.items():
+            click.echo(f"  {key}. {label}")
+
+        choice = click.prompt("Enter your choice", type=str).strip()
+
+        if choice == "1":
+            user = click.prompt("Filter by user (optional)", default="", show_default=False).strip() or None
+            category = click.prompt("Filter by category (optional)", default="", show_default=False).strip() or None
+            ctx = click.get_current_context()
+            ctx.invoke(list_tasks_cmd, user=user, category=category)
+        elif choice == "2":
+            title = click.prompt("Task title").strip()
+            desc = click.prompt("Task description (optional)", default="", show_default=False).strip() or None
+            ctx = click.get_current_context()
+            ctx.invoke(add_task_cmd, title=title, desc=desc)
+        elif choice == "3":
+            task_id = click.prompt("Task ID to mark complete", type=int)
+            ctx = click.get_current_context()
+            ctx.invoke(complete_task_cmd, task_id=task_id)
+        elif choice == "4":
+            task_id = click.prompt("Task ID to remove", type=int)
+            ctx = click.get_current_context()
+            ctx.invoke(remove_task_cmd, task_id=task_id)
+        elif choice == "5":
+            ctx = click.get_current_context()
+            ctx.invoke(show_summary_cmd)
+        elif choice == "6":
+            ctx = click.get_current_context()
+            ctx.invoke(list_users_cmd)
+        elif choice == "7":
+            user = click.prompt("Filter by user (optional)", default="", show_default=False).strip() or None
+            ctx = click.get_current_context()
+            ctx.invoke(list_categories_cmd, user=user)
+        elif choice == "0":
+            click.secho("Goodbye!", fg="green")
+            break
+        else:
+            click.secho("Invalid option. Please choose one of the menu numbers.", fg="yellow")
+
 def main(argv=None):
     return cli.main(args=argv)
 
